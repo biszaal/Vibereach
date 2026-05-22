@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VibeReach — Reddit Posts + Connected Accounts DynamoDB tables
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [prod, staging, dev]
+
+Resources:
+  RedditPostsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "vibereach-reddit-posts-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: projectId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: projectId-index
+          KeySchema:
+            - AttributeName: projectId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: VibeReach
+        - Key: Environment
+          Value: !Ref Environment
+
+  ConnectedAccountsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "vibereach-accounts-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      Tags:
+        - Key: Project
+          Value: VibeReach
+        - Key: Environment
+          Value: !Ref Environment
+
+  # FIFO queue for drip scheduling (anti-spam spacing)
+  PostingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "vibereach-posting-${Environment}.fifo"
+      FifoQueue: true
+      ContentBasedDeduplication: false
+      VisibilityTimeout: 120
+      MessageRetentionPeriod: 86400
+      Tags:
+        - Key: Project
+          Value: VibeReach
+
+Outputs:
+  RedditPostsTableName:
+    Value: !Ref RedditPostsTable
+    Export:
+      Name: !Sub "vibereach-reddit-posts-table-${Environment}"
+  AccountsTableName:
+    Value: !Ref ConnectedAccountsTable
+    Export:
+      Name: !Sub "vibereach-accounts-table-${Environment}"
+  PostingQueueUrl:
+    Value: !Ref PostingQueue
+    Export:
+      Name: !Sub "vibereach-posting-queue-${Environment}"
+  PostingQueueArn:
+    Value: !GetAtt PostingQueue.Arn
+    Export:
+      Name: !Sub "vibereach-posting-queue-arn-${Environment}"
