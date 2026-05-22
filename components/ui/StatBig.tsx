@@ -11,7 +11,7 @@ interface StatBigProps {
 export function StatBig({ value, label, sub, delta, deltaPositive }: StatBigProps) {
   return (
     <div
-      className="relative overflow-hidden rounded-sm p-8 glow-vermilion"
+      className="relative overflow-hidden rounded-sm p-5 sm:p-8 glow-vermilion"
       style={{ background: "#17120C" }}
     >
       {/* Radial glow handled by CSS .glow-vermilion::before */}
@@ -23,7 +23,7 @@ export function StatBig({ value, label, sub, delta, deltaPositive }: StatBigProp
           {label}
         </p>
         <p
-          className="text-7xl font-bold leading-none tracking-[-0.03em] mb-3"
+          className="text-5xl sm:text-7xl font-bold leading-none tracking-[-0.03em] mb-3"
           style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#EFE7D6" }}
         >
           {value}

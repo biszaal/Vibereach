@@ -316,12 +316,12 @@ export default function RedditPage() {
 
       <main className="flex-1 p-4 sm:p-6 space-y-5">
         {/* Tabs */}
-        <div className="flex items-center gap-0 border-b" style={{ borderColor: "rgba(23,18,12,0.14)" }}>
+        <div className="flex items-center gap-0 border-b overflow-x-auto" style={{ borderColor: "rgba(23,18,12,0.14)" }}>
           {TABS.map((t) => {
             const count = t === "drafts" ? drafts.length : t === "scheduled" ? scheduled.length : posted.length;
             return (
               <button key={t} onClick={() => setTab(t)}
-                className="px-4 py-2.5 text-xs font-semibold border-b-2 -mb-px capitalize transition-colors"
+                className="px-3 sm:px-4 py-2.5 text-xs font-semibold border-b-2 -mb-px capitalize transition-colors whitespace-nowrap"
                 style={{
                   fontFamily: "var(--font-jetbrains), monospace",
                   borderColor: tab === t ? "#F23005" : "transparent",

@@ -41,7 +41,7 @@ export function ReachChart() {
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full"
-        style={{ height: "180px" }}
+        style={{ height: "clamp(110px, 28vw, 180px)" }}
         preserveAspectRatio="none"
       >
         <defs>

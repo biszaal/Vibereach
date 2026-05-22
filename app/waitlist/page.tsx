@@ -62,7 +62,7 @@ export default async function WaitlistPage({ searchParams }: PageProps) {
       </nav>
 
       {/* Main */}
-      <main className="flex-1 flex items-start justify-center px-6 py-16 sm:py-24">
+      <main className="flex-1 flex items-start justify-center px-4 sm:px-6 py-12 sm:py-24">
         <div className="w-full max-w-xl">
           {/* Kicker */}
           <SectionLabel className="mb-6">Early access</SectionLabel>
@@ -94,7 +94,7 @@ export default async function WaitlistPage({ searchParams }: PageProps) {
 
       {/* What we're building strip */}
       <section
-        className="border-t px-6 py-10"
+        className="border-t px-4 sm:px-6 py-10"
         style={{ borderColor: "rgba(23,18,12,0.14)", background: "#E6DCC6" }}
       >
         <div className="max-w-3xl mx-auto">
@@ -148,11 +148,11 @@ export default async function WaitlistPage({ searchParams }: PageProps) {
 
       {/* Footer */}
       <footer
-        className="border-t px-6 py-5 flex items-center justify-between"
+        className="border-t px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center gap-2 sm:justify-between"
         style={{ borderColor: "rgba(23,18,12,0.14)" }}
       >
         <span
-          className="text-[0.65rem] uppercase tracking-[0.1em]"
+          className="text-[0.65rem] uppercase tracking-[0.1em] text-center sm:text-left"
           style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#8A8071" }}
         >
           VibeReach — built by an indie developer, for indie developers

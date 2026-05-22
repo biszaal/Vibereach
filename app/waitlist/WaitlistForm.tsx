@@ -108,7 +108,7 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
             Queue position
           </p>
           <p
-            className="text-8xl font-extrabold leading-none tracking-[-0.04em] mb-2"
+            className="text-6xl sm:text-8xl font-extrabold leading-none tracking-[-0.04em] mb-2"
             style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#EFE7D6" }}
           >
             #{position}
@@ -133,20 +133,20 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
             Share your personal link. Every person who signs up through it moves you forward.
           </p>
           <div className="flex gap-2">
-            <div
-              className="flex-1 px-3 py-2.5 border text-xs truncate"
+            <input
+              readOnly
+              value={referralUrl}
+              className="flex-1 px-3 py-2.5 border text-xs min-w-0 outline-none"
               style={{
                 fontFamily: "var(--font-jetbrains), monospace",
                 background: "#EFE7D6",
                 borderColor: "rgba(23,18,12,0.20)",
                 color: "#5C5346",
               }}
-            >
-              {referralUrl}
-            </div>
+            />
             <button
               onClick={copyLink}
-              className="px-4 py-2.5 text-xs font-semibold border rounded-sm shadow-hard-sm shrink-0 transition-none"
+              className="px-4 py-2.5 min-h-[44px] text-xs font-semibold border rounded-sm shadow-hard-sm shrink-0 transition-none"
               style={{
                 fontFamily: "var(--font-jetbrains), monospace",
                 background: copied ? "#3E8E4F" : "#17120C",
@@ -204,13 +204,12 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
             placeholder="your@email.com"
             autoComplete="email"
             required
-            className="flex-1 px-4 py-3.5 border text-sm outline-none focus:ring-0"
+            className="flex-1 px-4 py-3.5 border text-sm outline-none focus:ring-0 sm:border-r-0"
             style={{
               fontFamily: "var(--font-hanken), sans-serif",
               background: "#F4EEE0",
               borderColor: status === "error" ? "#F23005" : "rgba(23,18,12,0.30)",
               color: "#17120C",
-              borderRight: "none",
             }}
           />
           <button

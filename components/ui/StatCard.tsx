@@ -34,7 +34,7 @@ export function StatCard({
         {label}
       </p>
       <p
-        className="text-4xl font-bold leading-none tracking-[-0.025em] mb-1"
+        className="text-3xl sm:text-4xl font-bold leading-none tracking-[-0.025em] mb-1"
         style={{
           fontFamily: "var(--font-bricolage), sans-serif",
           color: accent ? "#F23005" : "#17120C",

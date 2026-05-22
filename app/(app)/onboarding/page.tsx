@@ -123,13 +123,12 @@ export default function OnboardingPage() {
                     placeholder="https://myapp.com"
                     autoFocus
                     required
-                    className="flex-1 px-4 py-3.5 border text-sm outline-none"
+                    className="flex-1 px-4 py-3.5 border text-sm outline-none sm:border-r-0"
                     style={{
                       fontFamily: "var(--font-hanken), sans-serif",
                       background: "#F4EEE0",
                       borderColor: stage === "error" ? "#F23005" : "rgba(23,18,12,0.30)",
                       color: "#17120C",
-                      borderRight: "none",
                     }}
                   />
                   <button
