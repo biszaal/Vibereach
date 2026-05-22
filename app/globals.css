@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Color tokens ── */
+  --color-paper:          #EFE7D6;
+  --color-paper-2:        #E6DCC6;
+  --color-card:           #F4EEE0;
+  --color-ink:            #17120C;
+  --color-ink-soft:       #5C5346;
+  --color-ink-faint:      #8A8071;
+  --color-vermilion:      #F23005;
+  --color-vermilion-deep: #C92704;
+  --color-green:          #3E8E4F;
+  --color-line:           rgba(23,18,12,0.14);
+  --color-line-strong:    rgba(23,18,12,0.30);
+
+  /* ── Fonts ── */
+  --font-display: var(--font-bricolage), sans-serif;
+  --font-body:    var(--font-hanken), sans-serif;
+  --font-mono:    var(--font-jetbrains), monospace;
+}
+
+/* ── Base reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #EFE7D6;
+  color: #17120C;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #EFE7D6;
+  color: #17120C;
+  font-family: var(--font-body, sans-serif);
+  min-height: 100vh;
+}
+
+/* ── Typography helpers ── */
+.font-display {
+  font-family: var(--font-display);
+}
+.font-body {
+  font-family: var(--font-body);
+}
+.font-mono-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+}
+
+/* ── Hard-shadow utilities ── */
+.shadow-hard {
+  box-shadow: 4px 4px 0 #17120C;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.shadow-hard:hover {
+  box-shadow: 6px 6px 0 #17120C;
+  transform: translate(-2px, -2px);
+}
+.shadow-hard-sm {
+  box-shadow: 2px 2px 0 #17120C;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.shadow-hard-sm:hover {
+  box-shadow: 4px 4px 0 #17120C;
+  transform: translate(-2px, -2px);
+}
+.shadow-hard-v {
+  box-shadow: 4px 4px 0 #F23005;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.shadow-hard-v:hover {
+  box-shadow: 6px 6px 0 #F23005;
+  transform: translate(-2px, -2px);
+}
+
+/* ── Film grain overlay ── */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.08;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+}
+
+/* ── Radial vermilion glow (for dark sections) ── */
+.glow-vermilion::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(242,48,5,0.35) 0%, transparent 65%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: #E6DCC6; }
+::-webkit-scrollbar-thumb  { background: rgba(23,18,12,0.30); border-radius: 0; }
+
+/* ── Selection ── */
+::selection { background: #F23005; color: #EFE7D6; }
+
+/* ── Ticker ── */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: flex;
+  animation: ticker-scroll 32s linear infinite;
+  white-space: nowrap;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
+/* ── Stagger reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Score wheel animation ── */
+@keyframes score-fill {
+  from { stroke-dashoffset: var(--score-start); }
+  to   { stroke-dashoffset: var(--score-end); }
+}
+.score-arc {
+  animation: score-fill 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
