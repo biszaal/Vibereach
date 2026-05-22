@@ -2,67 +2,104 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSidebar } from "./SidebarContext";
 
-const navGroups = [
-  {
-    label: "Workspace",
-    items: [
-      { href: "/dashboard",       label: "Dashboard",     icon: "◈" },
-      { href: "/playbook",        label: "Playbook",      icon: "◉" },
-    ],
-  },
-  {
-    label: "Engines",
-    items: [
-      { href: "/reddit",          label: "Reddit Engine", icon: "▣" },
-      { href: "/audit",           label: "SEO Audit",     icon: "◎" },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { href: "/settings",        label: "Settings",      icon: "◇" },
-    ],
-  },
-];
+interface Project {
+  projectId: string;
+  name: string;
+  url: string;
+}
 
-export function Sidebar() {
+interface SidebarProps {
+  currentProject?: Project | null;
+}
+
+export function Sidebar({ currentProject }: SidebarProps) {
   const pathname = usePathname();
+  const { close } = useSidebar();
+
+  const navGroups = [
+    {
+      label: "Workspace",
+      items: [
+        { href: "/dashboard", label: "Dashboard", icon: "◈" },
+        {
+          href: currentProject ? `/playbook` : "/onboarding",
+          label: "Playbook",
+          icon: "◉",
+          match: "/playbook",
+        },
+      ],
+    },
+    {
+      label: "Engines",
+      items: [
+        {
+          href: currentProject ? "/reddit" : "/onboarding",
+          label: "Reddit Engine",
+          icon: "▣",
+          match: "/reddit",
+        },
+        {
+          href: currentProject ? "/audit" : "/onboarding",
+          label: "SEO Audit",
+          icon: "◎",
+          match: "/audit",
+        },
+      ],
+    },
+    {
+      label: "Account",
+      items: [{ href: "/settings", label: "Settings", icon: "◇" }],
+    },
+  ];
+
+  function isActive(href: string, match?: string) {
+    const target = match ?? href;
+    return pathname === target || pathname.startsWith(target + "/");
+  }
 
   return (
     <aside
-      className="fixed left-0 top-0 bottom-0 w-56 flex flex-col border-r z-40"
-      style={{
-        background: "#EFE7D6",
-        borderColor: "rgba(23,18,12,0.14)",
-      }}
+      className="flex flex-col h-full border-r"
+      style={{ background: "#EFE7D6", borderColor: "rgba(23,18,12,0.14)" }}
     >
-      {/* Logo */}
+      {/* Logo + mobile close */}
       <div
-        className="flex items-center gap-2.5 px-5 py-5 border-b"
+        className="flex items-center justify-between px-5 py-5 border-b"
         style={{ borderColor: "rgba(23,18,12,0.14)" }}
       >
-        <span
-          className="w-6 h-6 flex items-center justify-center rounded-sm text-xs font-bold"
-          style={{ background: "#17120C", color: "#EFE7D6" }}
+        <div className="flex items-center gap-2.5">
+          <span
+            className="w-6 h-6 flex items-center justify-center rounded-sm text-xs font-bold shrink-0"
+            style={{ background: "#17120C", color: "#EFE7D6" }}
+          >
+            V
+          </span>
+          <span
+            className="text-base font-bold tracking-[-0.02em]"
+            style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#17120C" }}
+          >
+            VibeReach
+          </span>
+        </div>
+        {/* Mobile close button */}
+        <button
+          onClick={close}
+          className="md:hidden text-lg leading-none p-1"
+          style={{ color: "#8A8071" }}
+          aria-label="Close menu"
         >
-          V
-        </span>
-        <span
-          className="text-base font-bold tracking-[-0.02em]"
-          style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#17120C" }}
-        >
-          VibeReach
-        </span>
+          ×
+        </button>
       </div>
 
       {/* Project switcher */}
-      <div
-        className="mx-3 mt-4 mb-1 px-3 py-2.5 border rounded-sm cursor-pointer flex items-center justify-between group"
-        style={{
-          background: "#F4EEE0",
-          borderColor: "rgba(23,18,12,0.14)",
-        }}
+      <Link
+        href={currentProject ? "/onboarding" : "/onboarding"}
+        onClick={close}
+        className="mx-3 mt-4 mb-1 px-3 py-2.5 border rounded-sm flex items-center justify-between"
+        style={{ background: "#F4EEE0", borderColor: "rgba(23,18,12,0.14)" }}
       >
         <div className="min-w-0">
           <p
@@ -75,11 +112,11 @@ export function Sidebar() {
             className="text-xs font-semibold truncate"
             style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#17120C" }}
           >
-            My First Project
+            {currentProject?.name ?? "Add a project →"}
           </p>
         </div>
         <span className="text-[#8A8071] text-xs ml-2 shrink-0">⌄</span>
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 pt-3 pb-2 space-y-4">
@@ -93,11 +130,12 @@ export function Sidebar() {
             </p>
             <ul className="space-y-0.5">
               {group.items.map((item) => {
-                const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                const active = isActive(item.href, item.match);
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      onClick={close}
                       className="flex items-center gap-2.5 px-2.5 py-2 rounded-sm text-sm font-medium transition-colors"
                       style={{
                         fontFamily: "var(--font-hanken), sans-serif",
@@ -125,7 +163,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Plan / usage card */}
+      {/* Plan card */}
       <div
         className="mx-3 mb-3 p-3 border rounded-sm"
         style={{ background: "#F4EEE0", borderColor: "rgba(23,18,12,0.14)" }}
@@ -139,6 +177,7 @@ export function Sidebar() {
           </span>
           <Link
             href="/settings"
+            onClick={close}
             className="text-[0.62rem] font-semibold"
             style={{ color: "#F23005", fontFamily: "var(--font-jetbrains), monospace" }}
           >
@@ -194,16 +233,10 @@ export function Sidebar() {
           B
         </div>
         <div className="min-w-0 flex-1">
-          <p
-            className="text-xs font-semibold truncate leading-tight"
-            style={{ color: "#17120C" }}
-          >
+          <p className="text-xs font-semibold truncate leading-tight" style={{ color: "#17120C" }}>
             biszaal
           </p>
-          <p
-            className="text-[0.6rem] truncate"
-            style={{ color: "#8A8071" }}
-          >
+          <p className="text-[0.6rem] truncate" style={{ color: "#8A8071" }}>
             biszaal@gmail.com
           </p>
         </div>

@@ -47,28 +47,14 @@ const consultantFeed = [
     title: "Page load time is fast (1.1 s)",
     why: "Core Web Vitals are in the green. Keep image optimisation in place.",
   },
-  {
-    tag: "add" as const,
-    title: "Consider adding a demo video",
-    why: "Your product has a clear visual workflow — a 60-second screen recording can double trial signups.",
-  },
 ];
 
 const typeIcon: Record<string, string> = {
-  post:     "▣",
-  signup:   "◈",
-  audit:    "◎",
-  playbook: "◉",
-  draft:    "▣",
-  email:    "◇",
+  post: "▣", signup: "◈", audit: "◎", playbook: "◉", draft: "▣", email: "◇",
 };
 const typeColor: Record<string, string> = {
-  post:     "#3E8E4F",
-  signup:   "#3E8E4F",
-  audit:    "#F23005",
-  playbook: "#17120C",
-  draft:    "#8A8071",
-  email:    "#5C5346",
+  post: "#3E8E4F", signup: "#3E8E4F", audit: "#F23005",
+  playbook: "#17120C", draft: "#8A8071", email: "#5C5346",
 };
 
 export default function DashboardPage() {
@@ -78,8 +64,9 @@ export default function DashboardPage() {
         breadcrumb={["vibereach.io"]}
         title="Dashboard"
         actions={
-          <button
-            className="text-xs font-semibold px-4 py-1.5 rounded-sm border shadow-hard-sm"
+          <a
+            href="/onboarding"
+            className="text-xs font-semibold px-3 sm:px-4 py-1.5 rounded-sm border shadow-hard-sm whitespace-nowrap"
             style={{
               fontFamily: "var(--font-jetbrains), monospace",
               background: "#17120C",
@@ -88,17 +75,16 @@ export default function DashboardPage() {
             }}
           >
             + New Post
-          </button>
+          </a>
         }
       />
 
-      <main className="flex-1 p-6 space-y-6">
-        {/* Ticker strip */}
+      <main className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6">
         <Ticker items={tickerItems} />
 
         {/* Hero stat + stat cards */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="sm:col-span-2">
             <StatBig
               value="4,812"
               label="Total Reach"
@@ -124,13 +110,9 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Second stat row — different layout, never four identical */}
-        <div className="grid grid-cols-3 gap-4">
-          <StatCard
-            value="14"
-            label="Drafts Awaiting"
-            sub="approval in queue"
-          />
+        {/* Second stat row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard value="14" label="Drafts Awaiting" sub="approval in queue" />
           <StatCard
             value="8"
             label="Signups Attributed"
@@ -138,19 +120,13 @@ export default function DashboardPage() {
             delta="+3 this week"
             deltaPositive
           />
-          <StatCard
-            value="62%"
-            label="Email Open Rate"
-            sub="cold outreach — last batch"
-            accent
-          />
+          <StatCard value="62%" label="Email Open Rate" sub="cold outreach — last batch" accent />
         </div>
 
-        {/* Reach chart + activity feed */}
-        <div className="grid grid-cols-5 gap-4">
-          {/* Chart — wider column */}
+        {/* Chart + activity feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           <div
-            className="col-span-3 border rounded-sm p-5"
+            className="lg:col-span-3 border rounded-sm p-4 sm:p-5"
             style={{ background: "#F4EEE0", borderColor: "rgba(23,18,12,0.14)" }}
           >
             <div className="flex items-center justify-between mb-4">
@@ -165,9 +141,8 @@ export default function DashboardPage() {
             <ReachChart />
           </div>
 
-          {/* Activity feed */}
           <div
-            className="col-span-2 border rounded-sm p-5"
+            className="lg:col-span-2 border rounded-sm p-4 sm:p-5"
             style={{ background: "#F4EEE0", borderColor: "rgba(23,18,12,0.14)" }}
           >
             <SectionLabel className="mb-4">Activity</SectionLabel>
@@ -200,14 +175,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Consultant feed — "What to do next" */}
+        {/* Consultant feed */}
         <div>
           <SectionLabel className="mb-4">What to do next</SectionLabel>
           <div className="space-y-2.5">
             {consultantFeed.map((item, i) => (
               <div
                 key={i}
-                className="flex items-start gap-4 border rounded-sm px-5 py-4"
+                className="flex items-start gap-3 sm:gap-4 border rounded-sm px-4 sm:px-5 py-4"
                 style={{
                   background: "#F4EEE0",
                   borderColor:
@@ -216,17 +191,18 @@ export default function DashboardPage() {
                       : item.tag === "good"
                       ? "rgba(62,142,79,0.20)"
                       : "rgba(23,18,12,0.14)",
-                  borderLeft: item.tag === "fix"
-                    ? "3px solid #F23005"
-                    : item.tag === "good"
-                    ? "3px solid #3E8E4F"
-                    : "3px solid rgba(23,18,12,0.20)",
+                  borderLeft:
+                    item.tag === "fix"
+                      ? "3px solid #F23005"
+                      : item.tag === "good"
+                      ? "3px solid #3E8E4F"
+                      : "3px solid rgba(23,18,12,0.20)",
                 }}
               >
                 <Tag variant={item.tag} className="mt-0.5 shrink-0">
                   {item.tag === "good" ? "Good" : item.tag === "fix" ? "Fix" : "Add"}
                 </Tag>
-                <div>
+                <div className="min-w-0">
                   <p
                     className="text-sm font-semibold mb-1"
                     style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#17120C" }}

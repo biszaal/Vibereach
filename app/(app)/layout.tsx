@@ -1,12 +1,26 @@
+import { cookies } from "next/headers";
+import { AppShell } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+async function getCurrentProject() {
+  if (!process.env.AWS_ACCESS_KEY_ID) return null;
+  try {
+    const cookieStore = await cookies();
+    const projectId = cookieStore.get("currentProjectId")?.value;
+    if (!projectId) return null;
+    const { getProject } = await import("@/lib/projects");
+    return await getProject(projectId);
+  } catch {
+    return null;
+  }
+}
+
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const currentProject = await getCurrentProject();
+
   return (
-    <div className="flex min-h-screen" style={{ background: "#EFE7D6" }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0" style={{ marginLeft: "14rem" }}>
-        {children}
-      </div>
-    </div>
+    <AppShell sidebar={<Sidebar currentProject={currentProject ?? undefined} />}>
+      {children}
+    </AppShell>
   );
 }

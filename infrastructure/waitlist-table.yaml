@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VibeReach — Waitlist DynamoDB table
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [prod, staging, dev]
+
+Resources:
+  WaitlistTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "vibereach-waitlist-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: referralCode
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: referralCode-index
+          KeySchema:
+            - AttributeName: referralCode
+              KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
+      Tags:
+        - Key: Project
+          Value: VibeReach
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  TableName:
+    Value: !Ref WaitlistTable
+    Export:
+      Name: !Sub "vibereach-waitlist-table-${Environment}"
+  TableArn:
+    Value: !GetAtt WaitlistTable.Arn
+    Export:
+      Name: !Sub "vibereach-waitlist-table-arn-${Environment}"
