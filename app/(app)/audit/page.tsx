@@ -4,9 +4,18 @@ import { ScoreWheel } from "@/components/ui/ScoreWheel";
 import { Tag } from "@/components/ui/Tag";
 
 const critical = [
-  { title: "Add social proof above the fold", why: "No testimonials or user count visible before scroll. Conversion pages with social proof convert 34% better." },
-  { title: "Meta description is missing", why: "Google is auto-generating from body text. Write one under 160 chars with your core value prop." },
-  { title: "No FAQ section", why: "Common objections go unanswered — this is the most frequently cited reason for bounce on SaaS landing pages." },
+  {
+    title: "Add social proof above the fold",
+    why: "No testimonials or user count visible before scroll. Conversion pages with social proof convert 34% better.",
+  },
+  {
+    title: "Meta description is missing",
+    why: "Google is auto-generating from body text. Write one under 160 chars with your core value prop.",
+  },
+  {
+    title: "No FAQ section",
+    why: "Common objections go unanswered — this is the most frequently cited reason for bounce on SaaS landing pages.",
+  },
 ];
 
 const working = [
@@ -23,27 +32,27 @@ export default function AuditPage() {
         title="SEO Audit"
         actions={
           <button
-            className="text-xs font-medium px-3 py-1.5 border rounded-sm"
+            className="text-xs font-medium px-3 py-1.5 border rounded-sm whitespace-nowrap"
             style={{
               fontFamily: "var(--font-jetbrains), monospace",
               borderColor: "rgba(23,18,12,0.20)",
               color: "#5C5346",
             }}
           >
-            Re-run audit
+            Re-run
           </button>
         }
       />
-      <main className="flex-1 p-6 space-y-6">
+      <main className="flex-1 p-4 sm:p-6 space-y-6">
         {/* Score + summary */}
         <div
-          className="flex items-center gap-8 border rounded-sm p-6"
+          className="flex flex-col sm:flex-row items-start sm:items-center gap-6 border rounded-sm p-5 sm:p-6"
           style={{ background: "#F4EEE0", borderColor: "rgba(23,18,12,0.14)" }}
         >
-          <ScoreWheel score={71} size={110} label="Overall Score" />
+          <ScoreWheel score={71} size={100} label="Overall Score" />
           <div className="flex-1">
             <p
-              className="text-2xl font-bold leading-tight tracking-[-0.025em] mb-1"
+              className="text-xl sm:text-2xl font-bold leading-tight tracking-[-0.025em] mb-1"
               style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#17120C" }}
             >
               3 critical fixes, 2 recommended
@@ -60,9 +69,8 @@ export default function AuditPage() {
           </div>
         </div>
 
-        {/* Two columns */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* Critical */}
+        {/* Two columns — stack on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <SectionLabel className="mb-4">Fix this week</SectionLabel>
             <div className="space-y-3">
@@ -95,7 +103,6 @@ export default function AuditPage() {
             </div>
           </div>
 
-          {/* Working */}
           <div>
             <SectionLabel className="mb-4">Working well</SectionLabel>
             <div className="space-y-3">
@@ -129,9 +136,9 @@ export default function AuditPage() {
           </div>
         </div>
 
-        {/* Headline rewrite — dark block */}
+        {/* Headline rewrite */}
         <div
-          className="relative overflow-hidden rounded-sm p-6 glow-vermilion"
+          className="relative overflow-hidden rounded-sm p-5 sm:p-6 glow-vermilion"
           style={{ background: "#17120C" }}
         >
           <div className="relative z-10">
@@ -143,7 +150,7 @@ export default function AuditPage() {
               Current
             </p>
             <p
-              className="text-lg font-semibold mb-4 line-through"
+              className="text-base sm:text-lg font-semibold mb-4 line-through"
               style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#5C5346" }}
             >
               Marketing tools for developers
@@ -155,13 +162,13 @@ export default function AuditPage() {
               Suggested
             </p>
             <p
-              className="text-2xl font-bold tracking-[-0.02em]"
+              className="text-xl sm:text-2xl font-bold tracking-[-0.02em]"
               style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#EFE7D6" }}
             >
               You shipped. Nobody came.
             </p>
             <p className="mt-2 text-sm" style={{ color: "#8A8071" }}>
-              Uses the user's pain as the hook — more honest, less generic.
+              Uses the user&apos;s pain as the hook — more honest, less generic.
             </p>
           </div>
         </div>

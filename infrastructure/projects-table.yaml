@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VibeReach — Projects DynamoDB table
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [prod, staging, dev]
+
+Resources:
+  ProjectsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "vibereach-projects-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: userId-index
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: VibeReach
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  TableName:
+    Value: !Ref ProjectsTable
+    Export:
+      Name: !Sub "vibereach-projects-table-${Environment}"
+  TableArn:
+    Value: !GetAtt ProjectsTable.Arn
+    Export:
+      Name: !Sub "vibereach-projects-table-arn-${Environment}"

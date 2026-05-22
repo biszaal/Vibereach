@@ -19,3 +19,6 @@ export const db = DynamoDBDocumentClient.from(client, {
 
 export const WAITLIST_TABLE =
   process.env.WAITLIST_TABLE_NAME ?? "vibereach-waitlist";
+
+export const PROJECTS_TABLE =
+  process.env.PROJECTS_TABLE_NAME ?? "vibereach-projects";
