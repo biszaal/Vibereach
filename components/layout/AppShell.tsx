@@ -8,7 +8,7 @@ function Backdrop() {
   return (
     <div
       className="fixed inset-0 z-30 md:hidden"
-      style={{ background: "rgba(23,18,12,0.45)" }}
+      style={{ background: "rgba(23,18,12,0.50)" }}
       onClick={close}
       aria-hidden="true"
     />
@@ -26,28 +26,16 @@ function Shell({ sidebar, children }: AppShellProps) {
     <div className="flex min-h-screen" style={{ background: "#EFE7D6" }}>
       <Backdrop />
 
-      {/* Sidebar — fixed on desktop, slide-in drawer on mobile */}
+      {/* Sidebar — CSS-driven drawer on mobile, always visible on md+ */}
       <div
-        className="fixed left-0 top-0 bottom-0 z-40 transition-transform duration-200 ease-in-out"
-        style={{
-          width: "14rem",
-          transform: open ? "translateX(0)" : undefined,
-        }}
+        className="sidebar-drawer fixed inset-y-0 left-0 z-40"
+        style={{ width: "14rem" }}
+        data-open={open ? "true" : "false"}
       >
-        <style>{`
-          @media (max-width: 767px) {
-            .sidebar-drawer { transform: ${open ? "translateX(0)" : "translateX(-100%)"}; }
-          }
-          @media (min-width: 768px) {
-            .sidebar-drawer { transform: translateX(0) !important; }
-          }
-        `}</style>
-        <div className="sidebar-drawer h-full" style={{ width: "14rem" }}>
-          {sidebar}
-        </div>
+        {sidebar}
       </div>
 
-      {/* Main — offset by sidebar width on md+ */}
+      {/* Main content — offset by sidebar width on md+ */}
       <div className="flex-1 flex flex-col min-w-0 md:ml-56">
         {children}
       </div>
