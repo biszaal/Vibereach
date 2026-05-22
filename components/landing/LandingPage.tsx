@@ -262,18 +262,16 @@ export function LandingPage() {
             >
               You <span style={{ color: "#F23005" }}>shipped</span>.
               <br />
-              <span className="relative inline-block">
+              <span
+                style={{
+                  textDecorationLine: "line-through",
+                  textDecorationColor: "transparent",
+                  textDecorationThickness: "5px",
+                  textDecorationSkipInk: "none",
+                  animation: "strikeReveal 0.35s 0.9s ease forwards",
+                }}
+              >
                 Nobody came.
-                <span
-                  className="absolute block rounded-sm"
-                  style={{
-                    left: "-2%", right: "-2%", top: "58%", height: "5px",
-                    background: "#F23005",
-                    transform: "rotate(-2deg) scaleX(0)",
-                    transformOrigin: "left",
-                    animation: "strike 0.7s 0.9s cubic-bezier(0.7,0,0.3,1) forwards",
-                  }}
-                />
               </span>
             </h1>
 

@@ -168,6 +168,11 @@ body {
   to { transform: rotate(-2deg) scaleX(1); }
 }
 
+@keyframes strikeReveal {
+  from { text-decoration-color: transparent; }
+  to   { text-decoration-color: #F23005; }
+}
+
 /* ── Minimum touch target helper ── */
 .touch-target {
   min-height: 44px;
