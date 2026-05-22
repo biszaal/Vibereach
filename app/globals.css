@@ -163,6 +163,11 @@ body {
   .sub-row-mobile { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; }
 }
 
+/* ── Strike animation (landing hero) ── */
+@keyframes strike {
+  to { transform: rotate(-2deg) scaleX(1); }
+}
+
 /* ── Minimum touch target helper ── */
 .touch-target {
   min-height: 44px;

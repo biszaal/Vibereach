@@ -1,44 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   initialCount: number;
   initialRef?: string;
 }
 
-const statusSteps = [
-  { label: "Foundation",  done: true  },
-  { label: "Waitlist",    done: true  },
-  { label: "Analyser",    done: false, active: true },
-  { label: "Reddit",      done: false },
-  { label: "SEO Audit",   done: false },
-  { label: "Dashboard",   done: false },
-  { label: "Launch",      done: false },
+const AVATARS = [
+  { bg: "#F23005", l: "M" },
+  { bg: "#17120C", l: "S" },
+  { bg: "#5B8FC7", l: "J" },
+  { bg: "#3E8E4F", l: "+" },
 ];
 
 export function WaitlistForm({ initialCount, initialRef }: Props) {
-  const [email, setEmail]         = useState("");
-  const [status, setStatus]       = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg]   = useState("");
-  const [count, setCount]         = useState(initialCount);
-  const [position, setPosition]   = useState(0);
-  const [refCode, setRefCode]     = useState("");
-  const [copied, setCopied]       = useState(false);
-  const inputRef                  = useRef<HTMLInputElement>(null);
+  const [email,    setEmail]    = useState("");
+  const [status,   setStatus]   = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [count,    setCount]    = useState(initialCount);
+  const [position, setPosition] = useState(0);
+  const [refCode,  setRefCode]  = useState("");
+  const [copied,   setCopied]   = useState(false);
 
   // Live-refresh count every 30 s
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const id = setInterval(async () => {
       try {
         const res = await fetch("/api/waitlist/count");
-        if (res.ok) {
-          const data = await res.json();
-          setCount(data.count);
-        }
+        if (res.ok) { const d = await res.json(); setCount(d.count); }
       } catch { /* silent */ }
     }, 30_000);
-    return () => clearInterval(interval);
+    return () => clearInterval(id);
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -46,7 +39,6 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
     if (!email.trim()) return;
     setStatus("loading");
     setErrorMsg("");
-
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
@@ -54,245 +46,213 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
         body: JSON.stringify({ email: email.trim(), referralCode: initialRef }),
       });
       const data = await res.json();
-
       if (!res.ok) {
-        if (data.error === "invalid_email") {
-          setErrorMsg("That doesn't look like a valid email address.");
-        } else if (res.status === 503) {
-          setErrorMsg("Waitlist is coming soon — check back shortly.");
-        } else {
-          setErrorMsg("Something went wrong. Try again in a moment.");
-        }
+        setErrorMsg(
+          data.error === "invalid_email" ? "That doesn't look like a valid email." :
+          res.status === 503             ? "Waitlist coming soon — check back shortly." :
+                                          "Something went wrong. Try again."
+        );
         setStatus("error");
         return;
       }
-
       setPosition(data.position);
       setRefCode(data.referralCode);
       if (!data.alreadyJoined) setCount((c) => c + 1);
       setStatus("success");
     } catch {
-      setErrorMsg("Network error. Check your connection and try again.");
+      setErrorMsg("Network error. Check your connection.");
       setStatus("error");
     }
   }
 
+  const referralUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/waitlist?ref=${refCode}`
+      : `/waitlist?ref=${refCode}`;
+
   function copyLink() {
-    const url = `${window.location.origin}/waitlist?ref=${refCode}`;
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(referralUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }
 
-  const referralUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/waitlist?ref=${refCode}`
-    : `/waitlist?ref=${refCode}`;
+  function shareX() {
+    const text = encodeURIComponent(
+      "Joined the waitlist for VibeReach — marketing autopilot for builders. You ship, it makes sure people hear about it."
+    );
+    const url = encodeURIComponent(
+      typeof window !== "undefined" ? `${window.location.origin}/waitlist` : "https://vibereach.io/waitlist"
+    );
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
+  }
+
+  // ── Success state ─────────────────────────────────────────────────────────
 
   if (status === "success") {
     return (
-      <div className="space-y-8">
-        {/* Position hero */}
-        <div
-          className="border p-8"
-          style={{
-            background: "#17120C",
-            borderColor: "#17120C",
-            boxShadow: "6px 6px 0 rgba(23,18,12,0.25)",
-          }}
-        >
-          <p
-            className="text-[0.68rem] uppercase tracking-[0.12em] mb-3"
-            style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#5C5346" }}
-          >
-            Queue position
-          </p>
-          <p
-            className="text-6xl sm:text-8xl font-extrabold leading-none tracking-[-0.04em] mb-2"
-            style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#EFE7D6" }}
-          >
-            #{position}
-          </p>
-          <p className="text-base" style={{ color: "#8A8071" }}>
-            You&apos;re on the list. A confirmation is on its way.
-          </p>
+      <div className="space-y-7">
+        {/* Check mark */}
+        <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl mx-auto font-bold" style={{ background: "#3E8E4F", color: "#EFE7D6" }}>
+          ✓
         </div>
 
-        {/* Referral */}
-        <div
-          className="border p-6"
-          style={{ background: "#F4EEE0", borderColor: "rgba(23,18,12,0.14)" }}
+        <h2
+          className="font-extrabold tracking-[-0.025em] text-center"
+          style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", color: "#17120C" }}
         >
-          <p
-            className="text-[0.68rem] uppercase tracking-[0.12em] mb-1"
-            style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#8A8071" }}
-          >
-            Refer 3 friends to skip the queue
-          </p>
-          <p className="text-sm mb-4" style={{ color: "#5C5346" }}>
-            Share your personal link. Every person who signs up through it moves you forward.
-          </p>
-          <div className="flex gap-2">
-            <input
-              readOnly
-              value={referralUrl}
-              className="flex-1 px-3 py-2.5 border text-xs min-w-0 outline-none"
-              style={{
-                fontFamily: "var(--font-jetbrains), monospace",
-                background: "#EFE7D6",
-                borderColor: "rgba(23,18,12,0.20)",
-                color: "#5C5346",
-              }}
-            />
-            <button
-              onClick={copyLink}
-              className="px-4 py-2.5 min-h-[44px] text-xs font-semibold border rounded-sm shadow-hard-sm shrink-0 transition-none"
-              style={{
-                fontFamily: "var(--font-jetbrains), monospace",
-                background: copied ? "#3E8E4F" : "#17120C",
-                color: "#EFE7D6",
-                borderColor: copied ? "#3E8E4F" : "#17120C",
-              }}
-            >
-              {copied ? "Copied" : "Copy"}
-            </button>
+          You&apos;re in.
+        </h2>
+
+        <p className="text-center leading-relaxed" style={{ fontSize: "17px", color: "#5C5346" }}>
+          We&apos;ll email you the moment VibeReach opens. Want in sooner?
+        </p>
+
+        {/* Position card */}
+        <div className="relative overflow-hidden rounded-sm p-7" style={{ background: "#17120C" }}>
+          <div className="absolute top-[-40%] right-[-10%] w-[300px] h-[300px] pointer-events-none" style={{ background: "radial-gradient(circle, #F23005 0%, transparent 65%)", opacity: 0.40 }} />
+          <div className="relative">
+            <div className="text-[0.63rem] uppercase tracking-[0.12em] mb-1.5" style={{ fontFamily: "var(--font-jetbrains), monospace", color: "rgba(239,231,214,0.50)" }}>
+              Your position in line
+            </div>
+            <div className="font-extrabold leading-none tracking-[-0.04em] mb-3" style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "clamp(2.5rem, 10vw, 4rem)", color: "#EFE7D6" }}>
+              #<span style={{ color: "#F23005" }}>{position}</span>
+            </div>
+            <div style={{ fontSize: "13.5px", color: "rgba(239,231,214,0.65)" }}>
+              Skip ahead — <strong style={{ color: "#EFE7D6" }}>each friend who joins moves you up 5 spots.</strong>
+            </div>
           </div>
         </div>
 
-        {/* What's next */}
-        <div>
-          <p
-            className="text-[0.68rem] uppercase tracking-[0.12em] mb-3"
-            style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#8A8071" }}
+        {/* Share buttons */}
+        <div className="flex gap-2.5 flex-wrap">
+          <button
+            onClick={copyLink}
+            className="flex-1 min-w-[140px] min-h-[44px] text-[0.7rem] font-bold py-3 px-4 border rounded-sm"
+            style={{
+              fontFamily: "var(--font-jetbrains), monospace", letterSpacing: "0.06em", textTransform: "uppercase",
+              background: copied ? "#3E8E4F" : "#F23005",
+              color: "#EFE7D6",
+              borderColor: copied ? "#3E8E4F" : "#F23005",
+            }}
           >
-            What happens next
-          </p>
-          <ul className="space-y-2.5">
-            {[
-              "We're building the Reddit Engine and Project Analyser now.",
-              "Early-access invites go out in order — position matters.",
-              "You'll get one email when it's your turn. No newsletter.",
-            ].map((item, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span
-                  className="mt-0.5 shrink-0 text-[0.75rem]"
-                  style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#F23005" }}
-                >
-                  →
-                </span>
-                <p className="text-sm leading-relaxed" style={{ color: "#5C5346" }}>
-                  {item}
-                </p>
-              </li>
-            ))}
-          </ul>
+            {copied ? "Copied ✓" : "Copy invite link"}
+          </button>
+          <button
+            onClick={shareX}
+            className="flex-1 min-w-[140px] min-h-[44px] text-[0.7rem] font-bold py-3 px-4 border rounded-sm"
+            style={{ fontFamily: "var(--font-jetbrains), monospace", letterSpacing: "0.06em", textTransform: "uppercase", borderColor: "#17120C", color: "#17120C" }}
+          >
+            Share on X
+          </button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-10">
-      {/* Form */}
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="flex gap-0 flex-col sm:flex-row">
-          <input
-            ref={inputRef}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            autoComplete="email"
-            required
-            className="flex-1 px-4 py-3.5 border text-sm outline-none focus:ring-0 sm:border-r-0"
-            style={{
-              fontFamily: "var(--font-hanken), sans-serif",
-              background: "#F4EEE0",
-              borderColor: status === "error" ? "#F23005" : "rgba(23,18,12,0.30)",
-              color: "#17120C",
-            }}
-          />
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="px-6 py-3.5 text-sm font-semibold border shadow-hard shrink-0"
-            style={{
-              fontFamily: "var(--font-bricolage), sans-serif",
-              background: "#17120C",
-              color: "#EFE7D6",
-              borderColor: "#17120C",
-              opacity: status === "loading" ? 0.7 : 1,
-              cursor: status === "loading" ? "wait" : "pointer",
-            }}
-          >
-            {status === "loading" ? "Joining..." : "Join the waitlist →"}
-          </button>
-        </div>
-        {status === "error" && errorMsg && (
-          <p
-            className="mt-2 text-xs"
-            style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#F23005" }}
-          >
-            {errorMsg}
-          </p>
-        )}
-      </form>
+  // ── Idle / error state ────────────────────────────────────────────────────
 
-      {/* Counter */}
-      <div className="flex items-center gap-3">
-        <span
-          className="w-1.5 h-1.5 rounded-full animate-pulse"
-          style={{ background: "#3E8E4F" }}
-        />
-        <p
-          className="text-sm"
-          style={{ color: "#5C5346" }}
+  return (
+    <div className="space-y-8">
+      {/* Kicker */}
+      <div className="inline-flex items-center gap-2.5 border rounded-full px-4 py-2" style={{ borderColor: "rgba(23,18,12,0.28)", background: "rgba(255,255,255,0.22)" }}>
+        <span className="relative flex-shrink-0">
+          <span className="block w-2 h-2 rounded-full" style={{ background: "#F23005" }} />
+          <span className="absolute inset-[-4px] rounded-full border animate-ping" style={{ borderColor: "#F23005", animationDuration: "2s" }} />
+        </span>
+        <span className="text-[0.63rem] uppercase tracking-[0.1em]" style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#17120C" }}>
+          Launching late 2026
+        </span>
+      </div>
+
+      {/* Headline */}
+      <div>
+        <h1
+          className="font-extrabold leading-[0.93] tracking-[-0.035em] mb-5"
+          style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "clamp(2.5rem, 7vw, 4rem)", color: "#17120C" }}
         >
-          <span
-            className="font-semibold"
-            style={{ fontFamily: "var(--font-bricolage), sans-serif", color: "#17120C" }}
-          >
-            {count > 0 ? count.toLocaleString() : "—"}
-          </span>{" "}
-          {count === 1 ? "developer" : "developers"} waiting
+          You ship.<br />
+          We make sure they <span style={{ color: "#F23005" }}>hear about it.</span>
+        </h1>
+        <p className="leading-relaxed max-w-md" style={{ fontSize: "17px", color: "#5C5346" }}>
+          VibeReach is the marketing autopilot for builders — Reddit, cold email and SEO on rails.{" "}
+          <strong style={{ color: "#17120C", fontWeight: 600 }}>We&apos;re building it now.</strong>{" "}
+          Get in before launch.
         </p>
       </div>
 
-      {/* Status strip */}
-      <div
-        className="border-t pt-8"
-        style={{ borderColor: "rgba(23,18,12,0.14)" }}
-      >
-        <p
-          className="text-[0.65rem] uppercase tracking-[0.14em] mb-4"
-          style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#8A8071" }}
-        >
-          Build progress
-        </p>
-        <div className="flex flex-wrap gap-x-6 gap-y-3">
-          {statusSteps.map((step, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span
-                className="text-[0.7rem]"
-                style={{
-                  fontFamily: "var(--font-jetbrains), monospace",
-                  color: step.done ? "#3E8E4F" : step.active ? "#F23005" : "#8A8071",
-                }}
-              >
-                {step.done ? "✓" : step.active ? "→" : "○"}
-              </span>
-              <span
-                className="text-[0.72rem]"
-                style={{
-                  fontFamily: "var(--font-jetbrains), monospace",
-                  color: step.done ? "#17120C" : step.active ? "#17120C" : "#8A8071",
-                  fontWeight: step.active ? "600" : "400",
-                }}
-              >
-                {step.label}
-              </span>
+      {/* Form */}
+      <div>
+        <form onSubmit={handleSubmit} noValidate>
+          {/* Rounded container wrapping input + button */}
+          <div
+            className="flex items-center gap-2 px-4 pr-2 rounded-sm max-w-[440px]"
+            style={{
+              background: "#F4EEE0",
+              border: `1px solid ${status === "error" ? "#F23005" : "#17120C"}`,
+              boxShadow: "5px 5px 0 rgba(23,18,12,0.10)",
+            }}
+          >
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@yourproject.com"
+              autoComplete="email"
+              required
+              className="flex-1 py-3.5 text-[15px] outline-none bg-transparent min-w-0"
+              style={{ fontFamily: "var(--font-hanken), sans-serif", color: "#17120C" }}
+            />
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="shrink-0 my-1.5 text-[0.7rem] font-bold px-5 py-3 rounded-sm whitespace-nowrap"
+              style={{
+                fontFamily: "var(--font-jetbrains), monospace", letterSpacing: "0.08em", textTransform: "uppercase",
+                background: "#F23005", color: "#EFE7D6",
+                opacity: status === "loading" ? 0.7 : 1,
+              }}
+            >
+              {status === "loading" ? "Joining..." : "Join the list →"}
+            </button>
+          </div>
+        </form>
+
+        {status === "error" && errorMsg && (
+          <p className="mt-2 text-[0.68rem] uppercase tracking-[0.04em]" style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#F23005" }}>
+            {errorMsg}
+          </p>
+        )}
+
+        {/* Micro copy */}
+        <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3.5">
+          {["No spam, ever", "First 500 get Pro free for 3 months"].map((item) => (
+            <span key={item} className="flex items-center gap-1.5 text-xs" style={{ color: "#8A8071" }}>
+              <span className="font-bold text-[0.63rem]" style={{ fontFamily: "var(--font-jetbrains), monospace", color: "#F23005" }}>✓</span>
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Counter with avatars */}
+      <div className="flex items-center gap-3.5">
+        <div className="flex">
+          {AVATARS.map((av, i) => (
+            <div
+              key={i}
+              className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-extrabold shrink-0"
+              style={{ background: av.bg, color: "#EFE7D6", fontFamily: "var(--font-bricolage), sans-serif", borderColor: "#EFE7D6", marginLeft: i === 0 ? 0 : "-9px" }}
+            >
+              {av.l}
             </div>
           ))}
+        </div>
+        <div className="text-sm" style={{ color: "#5C5346" }}>
+          <span className="font-extrabold" style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "16px", color: "#17120C" }}>
+            {count > 0 ? count.toLocaleString() : "—"}
+          </span>{" "}
+          builders already waiting
         </div>
       </div>
     </div>
