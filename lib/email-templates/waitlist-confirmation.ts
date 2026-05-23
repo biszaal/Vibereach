@@ -1,9 +1,10 @@
 interface Props {
   position: number;
   referralUrl: string;
+  statusUrl: string;
 }
 
-export function waitlistConfirmationHtml({ position, referralUrl }: Props): string {
+export function waitlistConfirmationHtml({ position, referralUrl, statusUrl }: Props): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +44,7 @@ export function waitlistConfirmationHtml({ position, referralUrl }: Props): stri
             our own projects launched to silence.
           </p>
           <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#5C5346;">
-            Refer 3 friends and skip the queue. Your personal link:
+            Every friend who joins moves you up 5 spots. Share your personal link:
           </p>
 
           <!-- Referral link box -->
@@ -56,6 +57,11 @@ export function waitlistConfirmationHtml({ position, referralUrl }: Props): stri
               </td>
             </tr>
           </table>
+
+          <!-- Check your spot -->
+          <p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:#5C5346;">
+            Want to watch your spot climb? <a href="${statusUrl}" style="color:#F23005;font-weight:bold;text-decoration:underline;">Check your position</a> any time.
+          </p>
         </td></tr>
 
         <!-- What's coming -->
