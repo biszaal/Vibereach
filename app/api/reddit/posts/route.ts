@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { generateRedditPosts } from "@/lib/claude";
+import { generateRedditPosts } from "@/lib/ai";
 import { getProject } from "@/lib/projects";
 import { createDraftPosts, listProjectPosts } from "@/lib/reddit-posts";
 
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
   const angle = subInfo?.angle ?? `genuine contribution to r/${subreddit}`;
   const fitScore = subInfo?.fitScore ?? 50;
 
-  // Generate with Claude
+  // Generate with the AI
   let posts;
   try {
     posts = await generateRedditPosts(project.playbook, subreddit, angle);

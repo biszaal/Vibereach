@@ -5,7 +5,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ScoreWheel } from "@/components/ui/ScoreWheel";
 import { Tag } from "@/components/ui/Tag";
-import type { AuditReport } from "@/lib/claude";
+import type { AuditReport } from "@/lib/ai";
 
 interface ReportRecord {
   reportId: string;

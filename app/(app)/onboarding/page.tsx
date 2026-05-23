@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import type { Playbook } from "@/lib/claude";
+import type { Playbook } from "@/lib/ai";
 
 type Stage = "input" | "analyzing" | "done" | "error";
 
@@ -108,7 +108,7 @@ export default function OnboardingPage() {
                 Get a playbook.
               </h2>
               <p className="text-sm leading-relaxed mb-8" style={{ color: "#5C5346" }}>
-                VibeReach scrapes your landing page, sends it to Claude, and returns a full
+                VibeReach scrapes your landing page, sends it to our AI, and returns a full
                 marketing playbook — personas, value props, voice, and a ranked list of
                 subreddits to target.
               </p>

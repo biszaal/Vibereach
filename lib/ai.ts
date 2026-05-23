@@ -67,7 +67,7 @@ async function call(system: string, user: string): Promise<string> {
     messages: [{ role: "user", content: user }],
   });
   const block = msg.content[0];
-  if (block.type !== "text") throw new Error("Unexpected Claude response type");
+  if (block.type !== "text") throw new Error("Unexpected AI response type");
   // Strip accidental markdown fences
   return block.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
 }

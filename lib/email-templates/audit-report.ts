@@ -1,4 +1,4 @@
-import type { AuditReport } from "@/lib/claude";
+import type { AuditReport } from "@/lib/ai";
 
 interface Props {
   url: string;

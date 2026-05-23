@@ -3,7 +3,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { TerminalBlock } from "@/components/ui/TerminalBlock";
 import { Tag } from "@/components/ui/Tag";
-import type { Playbook, Persona, Subreddit } from "@/lib/claude";
+import type { Playbook, Persona, Subreddit } from "@/lib/ai";
 
 async function getPlaybook(): Promise<{ playbook: Playbook | null; projectName: string }> {
   if (!process.env.AWS_ACCESS_KEY_ID) return { playbook: null, projectName: "" };

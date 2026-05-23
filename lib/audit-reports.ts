@@ -1,7 +1,7 @@
 import { GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import crypto from "crypto";
 import { db } from "./dynamodb";
-import type { AuditReport } from "./claude";
+import type { AuditReport } from "./ai";
 
 export const AUDIT_TABLE = process.env.AUDIT_TABLE_NAME ?? "vibereach-audit-reports";
 

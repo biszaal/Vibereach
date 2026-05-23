@@ -276,7 +276,7 @@ export function LandingPage() {
             </h1>
 
             <p className="text-base sm:text-lg leading-relaxed mb-8 max-w-[440px]" style={{ color: "#5C5346" }}>
-              You built the whole thing with Claude Code in a weekend. The marketing is the part nobody taught you.{" "}
+              You built the whole thing in a weekend. The marketing is the part nobody taught you.{" "}
               <strong style={{ color: "#17120C", fontWeight: 600 }}>VibeReach posts, emails, and tunes your launch</strong>{" "}
               like a growth hire who never sleeps.
             </p>

@@ -6,7 +6,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import crypto from "crypto";
 import { db, PROJECTS_TABLE } from "./dynamodb";
-import type { Playbook } from "./claude";
+import type { Playbook } from "./ai";
 
 export type ProjectStatus = "analyzing" | "ready" | "failed";
 

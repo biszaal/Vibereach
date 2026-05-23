@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { scrapeUrl } from "@/lib/scraper";
-import { generateAudit } from "@/lib/claude";
+import { generateAudit } from "@/lib/ai";
 import { getProject } from "@/lib/projects";
 import { saveAuditReport, getLatestAuditReport } from "@/lib/audit-reports";
 import { Resend } from "resend";

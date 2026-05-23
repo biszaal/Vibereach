@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scrapeUrl } from "@/lib/scraper";
-import { generatePlaybook } from "@/lib/claude";
+import { generatePlaybook } from "@/lib/ai";
 import {
   createProject,
   updateProjectPlaybook,
