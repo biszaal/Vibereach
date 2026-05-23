@@ -8,6 +8,13 @@ import { ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
 import { db, WAITLIST_TABLE } from "./dynamodb";
 import crypto from "crypto";
 
+export const REFERRAL_BOOST = 5;
+
+/** Boosted queue spot shown to the user. Stored `position` is never mutated. */
+export function effectivePosition(rawPosition: number, referralCount: number): number {
+  return Math.max(1, rawPosition - referralCount * REFERRAL_BOOST);
+}
+
 const COUNTER_PK = "__COUNTER__";
 const COUNTER_SK = "WAITLIST";
 
@@ -61,8 +68,8 @@ export async function getReferrerEmailByCode(
 }
 
 export type JoinResult =
-  | { ok: true; position: number; referralCode: string; alreadyJoined: false }
-  | { ok: true; position: number; referralCode: string; alreadyJoined: true }
+  | { ok: true; position: number; referralCode: string; referralCount: number; alreadyJoined: false }
+  | { ok: true; position: number; referralCode: string; referralCount: number; alreadyJoined: true }
   | { ok: false; error: "invalid_email" | "service_unavailable" };
 
 export async function joinWaitlist(
@@ -85,6 +92,7 @@ export async function joinWaitlist(
       alreadyJoined: true,
       position: existing.Item.position as number,
       referralCode: existing.Item.referralCode as string,
+      referralCount: (existing.Item.referralCount as number) ?? 0,
     };
   }
 
@@ -129,6 +137,7 @@ export async function joinWaitlist(
         alreadyJoined: true,
         position: refetch.Item!.position as number,
         referralCode: refetch.Item!.referralCode as string,
+        referralCount: (refetch.Item!.referralCount as number) ?? 0,
       };
     }
     throw err;
@@ -146,5 +155,48 @@ export async function joinWaitlist(
     );
   }
 
-  return { ok: true, alreadyJoined: false, position, referralCode: newCode };
+  return { ok: true, alreadyJoined: false, position, referralCode: newCode, referralCount: 0 };
+}
+
+export interface WaitlistStatus {
+  referralCode: string;
+  rawPosition: number;
+  referralCount: number;
+  boostedPosition: number;
+  spotsSkipped: number;
+}
+
+/** Look up a member's live status by their (public) referral code. */
+export async function getWaitlistStatusByCode(
+  code: string
+): Promise<WaitlistStatus | null> {
+  const idx = await db.send(
+    new QueryCommand({
+      TableName: WAITLIST_TABLE,
+      IndexName: "referralCode-index",
+      KeyConditionExpression: "referralCode = :code",
+      ExpressionAttributeValues: { ":code": code },
+      Limit: 1,
+    })
+  );
+  if (!idx.Items?.length) return null;
+
+  // GSI is KEYS_ONLY — fetch the full profile by its table keys.
+  const { pk, sk } = idx.Items[0];
+  const res = await db.send(
+    new GetCommand({ TableName: WAITLIST_TABLE, Key: { pk, sk } })
+  );
+  const item = res.Item;
+  if (!item) return null;
+
+  const rawPosition = item.position as number;
+  const referralCount = (item.referralCount as number) ?? 0;
+  const boostedPosition = effectivePosition(rawPosition, referralCount);
+  return {
+    referralCode: item.referralCode as string,
+    rawPosition,
+    referralCount,
+    boostedPosition,
+    spotsSkipped: rawPosition - boostedPosition,
+  };
 }
