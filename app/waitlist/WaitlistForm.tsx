@@ -2,9 +2,17 @@
 
 import { useState, useEffect } from "react";
 
+interface InitialStatus {
+  boostedPosition: number;
+  referralCount: number;
+  spotsSkipped: number;
+  referralCode: string;
+}
+
 interface Props {
   initialCount: number;
   initialRef?: string;
+  initialStatus?: InitialStatus;
 }
 
 const AVATARS = [
@@ -14,14 +22,142 @@ const AVATARS = [
   { bg: "#3E8E4F", l: "+" },
 ];
 
-export function WaitlistForm({ initialCount, initialRef }: Props) {
-  const [email,    setEmail]    = useState("");
-  const [status,   setStatus]   = useState<"idle" | "loading" | "success" | "error">("idle");
+function progressLine(referralCount: number, spotsSkipped: number): string {
+  if (referralCount === 0) return "Share to start climbing — 5 spots per friend.";
+  const friend = referralCount === 1 ? "friend" : "friends";
+  const spot = spotsSkipped === 1 ? "spot" : "spots";
+  return `${referralCount} ${friend} joined · ${spotsSkipped} ${spot} skipped`;
+}
+
+// ── Shared result view (success + status modes) ─────────────────────────────
+
+interface ResultViewProps {
+  headline: string;
+  subcopy: string;
+  position: number;
+  referralCount: number;
+  spotsSkipped: number;
+  referralCode: string;
+  showCheck: boolean;
+}
+
+function ResultView({
+  headline,
+  subcopy,
+  position,
+  referralCount,
+  spotsSkipped,
+  referralCode,
+  showCheck,
+}: ResultViewProps) {
+  const [copied, setCopied] = useState(false);
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const inviteUrl = `${origin}/waitlist?ref=${referralCode}`;
+  const statusUrl = `${origin}/waitlist?me=${referralCode}`;
+  const atFront = position <= 1;
+
+  function copyLink() {
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function shareX() {
+    const text = encodeURIComponent(
+      "Joined the waitlist for VibeReach — marketing autopilot for builders. You ship, it makes sure people hear about it."
+    );
+    const url = encodeURIComponent(inviteUrl);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
+  }
+
+  return (
+    <div className="space-y-7">
+      {showCheck && (
+        <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl mx-auto font-bold" style={{ background: "#3E8E4F", color: "#EFE7D6" }}>
+          ✓
+        </div>
+      )}
+
+      <h2
+        className="font-extrabold tracking-[-0.025em] text-center"
+        style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", color: "#17120C" }}
+      >
+        {headline}
+      </h2>
+
+      <p className="text-center leading-relaxed" style={{ fontSize: "17px", color: "#5C5346" }}>
+        {subcopy}
+      </p>
+
+      {/* Position card */}
+      <div className="relative overflow-hidden rounded-sm p-7" style={{ background: "#17120C" }}>
+        <div className="absolute top-[-40%] right-[-10%] w-[300px] h-[300px] pointer-events-none" style={{ background: "radial-gradient(circle, #F23005 0%, transparent 65%)", opacity: 0.40 }} />
+        <div className="relative">
+          <div className="text-[0.63rem] uppercase tracking-[0.12em] mb-1.5" style={{ fontFamily: "var(--font-jetbrains), monospace", color: "rgba(239,231,214,0.50)" }}>
+            Your position in line
+          </div>
+          <div className="font-extrabold leading-none tracking-[-0.04em] mb-3" style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "clamp(2.5rem, 10vw, 4rem)", color: "#EFE7D6" }}>
+            #<span style={{ color: "#F23005" }}>{position}</span>
+          </div>
+          <div style={{ fontSize: "13.5px", color: "rgba(239,231,214,0.65)" }}>
+            {atFront ? (
+              <strong style={{ color: "#EFE7D6" }}>Front of the line. You&apos;re first.</strong>
+            ) : (
+              progressLine(referralCount, spotsSkipped)
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Share buttons */}
+      <div className="flex gap-2.5 flex-wrap">
+        <button
+          onClick={copyLink}
+          className="flex-1 min-w-[140px] min-h-[44px] text-[0.7rem] font-bold py-3 px-4 border rounded-sm"
+          style={{
+            fontFamily: "var(--font-jetbrains), monospace", letterSpacing: "0.06em", textTransform: "uppercase",
+            background: copied ? "#3E8E4F" : "#F23005",
+            color: "#EFE7D6",
+            borderColor: copied ? "#3E8E4F" : "#F23005",
+          }}
+        >
+          {copied ? "Copied ✓" : "Copy invite link"}
+        </button>
+        <button
+          onClick={shareX}
+          className="flex-1 min-w-[140px] min-h-[44px] text-[0.7rem] font-bold py-3 px-4 border rounded-sm"
+          style={{ fontFamily: "var(--font-jetbrains), monospace", letterSpacing: "0.06em", textTransform: "uppercase", borderColor: "#17120C", color: "#17120C" }}
+        >
+          Share on X
+        </button>
+      </div>
+
+      {/* Bookmark / check your spot */}
+      <p className="text-center text-xs" style={{ color: "#8A8071" }}>
+        <a href={statusUrl} className="underline" style={{ color: "#5C5346", textUnderlineOffset: "3px" }}>
+          Bookmark your spot
+        </a>{" "}
+        — come back any time to watch it climb.
+      </p>
+    </div>
+  );
+}
+
+// ── Form ────────────────────────────────────────────────────────────────────
+
+export function WaitlistForm({ initialCount, initialRef, initialStatus }: Props) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [count,    setCount]    = useState(initialCount);
-  const [position, setPosition] = useState(0);
-  const [refCode,  setRefCode]  = useState("");
-  const [copied,   setCopied]   = useState(false);
+  const [count, setCount] = useState(initialCount);
+  const [result, setResult] = useState<{
+    position: number;
+    referralCount: number;
+    spotsSkipped: number;
+    referralCode: string;
+  } | null>(null);
 
   // Live-refresh count every 30 s
   useEffect(() => {
@@ -55,8 +191,12 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
         setStatus("error");
         return;
       }
-      setPosition(data.position);
-      setRefCode(data.referralCode);
+      setResult({
+        position: data.position,
+        referralCount: data.referralCount,
+        spotsSkipped: data.spotsSkipped,
+        referralCode: data.referralCode,
+      });
       if (!data.alreadyJoined) setCount((c) => c + 1);
       setStatus("success");
     } catch {
@@ -65,88 +205,33 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
     }
   }
 
-  const referralUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/waitlist?ref=${refCode}`
-      : `/waitlist?ref=${refCode}`;
-
-  function copyLink() {
-    navigator.clipboard.writeText(referralUrl).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  function shareX() {
-    const text = encodeURIComponent(
-      "Joined the waitlist for VibeReach — marketing autopilot for builders. You ship, it makes sure people hear about it."
+  // ── Status mode (bookmarked ?me= link) ────────────────────────────────────
+  if (initialStatus) {
+    return (
+      <ResultView
+        headline="Your spot"
+        subcopy="Every friend who joins moves you up 5 spots. Keep sharing."
+        position={initialStatus.boostedPosition}
+        referralCount={initialStatus.referralCount}
+        spotsSkipped={initialStatus.spotsSkipped}
+        referralCode={initialStatus.referralCode}
+        showCheck={false}
+      />
     );
-    const url = encodeURIComponent(
-      typeof window !== "undefined" ? `${window.location.origin}/waitlist` : "https://vibereach.io/waitlist"
-    );
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
   }
 
   // ── Success state ─────────────────────────────────────────────────────────
-
-  if (status === "success") {
+  if (status === "success" && result) {
     return (
-      <div className="space-y-7">
-        {/* Check mark */}
-        <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl mx-auto font-bold" style={{ background: "#3E8E4F", color: "#EFE7D6" }}>
-          ✓
-        </div>
-
-        <h2
-          className="font-extrabold tracking-[-0.025em] text-center"
-          style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", color: "#17120C" }}
-        >
-          You&apos;re in.
-        </h2>
-
-        <p className="text-center leading-relaxed" style={{ fontSize: "17px", color: "#5C5346" }}>
-          We&apos;ll email you the moment VibeReach opens. Want in sooner?
-        </p>
-
-        {/* Position card */}
-        <div className="relative overflow-hidden rounded-sm p-7" style={{ background: "#17120C" }}>
-          <div className="absolute top-[-40%] right-[-10%] w-[300px] h-[300px] pointer-events-none" style={{ background: "radial-gradient(circle, #F23005 0%, transparent 65%)", opacity: 0.40 }} />
-          <div className="relative">
-            <div className="text-[0.63rem] uppercase tracking-[0.12em] mb-1.5" style={{ fontFamily: "var(--font-jetbrains), monospace", color: "rgba(239,231,214,0.50)" }}>
-              Your position in line
-            </div>
-            <div className="font-extrabold leading-none tracking-[-0.04em] mb-3" style={{ fontFamily: "var(--font-bricolage), sans-serif", fontSize: "clamp(2.5rem, 10vw, 4rem)", color: "#EFE7D6" }}>
-              #<span style={{ color: "#F23005" }}>{position}</span>
-            </div>
-            <div style={{ fontSize: "13.5px", color: "rgba(239,231,214,0.65)" }}>
-              Skip ahead — <strong style={{ color: "#EFE7D6" }}>each friend who joins moves you up 5 spots.</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* Share buttons */}
-        <div className="flex gap-2.5 flex-wrap">
-          <button
-            onClick={copyLink}
-            className="flex-1 min-w-[140px] min-h-[44px] text-[0.7rem] font-bold py-3 px-4 border rounded-sm"
-            style={{
-              fontFamily: "var(--font-jetbrains), monospace", letterSpacing: "0.06em", textTransform: "uppercase",
-              background: copied ? "#3E8E4F" : "#F23005",
-              color: "#EFE7D6",
-              borderColor: copied ? "#3E8E4F" : "#F23005",
-            }}
-          >
-            {copied ? "Copied ✓" : "Copy invite link"}
-          </button>
-          <button
-            onClick={shareX}
-            className="flex-1 min-w-[140px] min-h-[44px] text-[0.7rem] font-bold py-3 px-4 border rounded-sm"
-            style={{ fontFamily: "var(--font-jetbrains), monospace", letterSpacing: "0.06em", textTransform: "uppercase", borderColor: "#17120C", color: "#17120C" }}
-          >
-            Share on X
-          </button>
-        </div>
-      </div>
+      <ResultView
+        headline="You're in."
+        subcopy="We'll email you the moment VibeReach opens. Want in sooner?"
+        position={result.position}
+        referralCount={result.referralCount}
+        spotsSkipped={result.spotsSkipped}
+        referralCode={result.referralCode}
+        showCheck={true}
+      />
     );
   }
 
@@ -184,7 +269,6 @@ export function WaitlistForm({ initialCount, initialRef }: Props) {
       {/* Form */}
       <div>
         <form onSubmit={handleSubmit} noValidate>
-          {/* Rounded container wrapping input + button */}
           <div
             className="flex items-center gap-2 px-4 pr-2 rounded-sm max-w-[440px]"
             style={{
