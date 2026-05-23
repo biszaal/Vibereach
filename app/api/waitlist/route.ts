@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { joinWaitlist } from "@/lib/waitlist";
+import { joinWaitlist, effectivePosition } from "@/lib/waitlist";
 import { sendWaitlistConfirmation } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -47,8 +47,13 @@ export async function POST(req: NextRequest) {
     ).catch((err) => console.error("[waitlist] email error", err));
   }
 
+  const boostedPosition = effectivePosition(result.position, result.referralCount);
+
   return NextResponse.json({
-    position: result.position,
+    position: boostedPosition,
+    rawPosition: result.position,
+    referralCount: result.referralCount,
+    spotsSkipped: result.position - boostedPosition,
     referralCode: result.referralCode,
     alreadyJoined: result.alreadyJoined,
   });
