@@ -17,8 +17,19 @@ async function getInitialCount(): Promise<number> {
   }
 }
 
+async function getStatus(code?: string) {
+  if (!code || !process.env.AWS_ACCESS_KEY_ID) return undefined;
+  try {
+    const { getWaitlistStatusByCode } = await import("@/lib/waitlist");
+    const s = await getWaitlistStatusByCode(code);
+    return s ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 interface PageProps {
-  searchParams: Promise<{ ref?: string }>;
+  searchParams: Promise<{ ref?: string; me?: string }>;
 }
 
 const PIPES = [
@@ -28,7 +39,8 @@ const PIPES = [
 ];
 
 export default async function WaitlistPage({ searchParams }: PageProps) {
-  const [count, params] = await Promise.all([getInitialCount(), searchParams]);
+  const params = await searchParams;
+  const [count, status] = await Promise.all([getInitialCount(), getStatus(params.me)]);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#EFE7D6" }}>
@@ -62,7 +74,20 @@ export default async function WaitlistPage({ searchParams }: PageProps) {
       <main className="flex-1 flex items-start justify-center px-4 sm:px-6 py-12 sm:py-20">
         <div className="w-full max-w-[600px]">
           <Suspense>
-            <WaitlistForm initialCount={count} initialRef={params.ref} />
+            <WaitlistForm
+              initialCount={count}
+              initialRef={params.ref}
+              initialStatus={
+                status
+                  ? {
+                      boostedPosition: status.boostedPosition,
+                      referralCount: status.referralCount,
+                      spotsSkipped: status.spotsSkipped,
+                      referralCode: status.referralCode,
+                    }
+                  : undefined
+              }
+            />
           </Suspense>
         </div>
       </main>
